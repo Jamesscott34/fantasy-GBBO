@@ -2,6 +2,7 @@ import java.io.*;
 import java.util.*;
 
 
+
 public class CSVHandler {
 
     public static void resetPlayerFiles() {
@@ -86,6 +87,7 @@ public class CSVHandler {
         }
     }
 
+
     public void createPlayerCSV(String enteredUsername, String[] contestantDetails) {
         String filePath = "./Files/" + enteredUsername + ".csv";
 
@@ -124,6 +126,7 @@ public class CSVHandler {
             }
         }
     }
+
 
 
 
@@ -182,6 +185,40 @@ public class CSVHandler {
         }
         return playerData;
     }
+
+
+    public static void createPlayerCSV(String username, String[] selectedContestants) {
+        String playerFileName = "./Files/" + username + ".csv";
+        List<String[]> playerData = readPlayer(); // Assuming readPlayer() reads Players.csv
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(playerFileName))) {
+            for (String[] player : playerData) {
+                if (player[2].equals(username)) { // Check if the username matches in Players.csv
+                    writer.write("Name: " + player[0] + "\n");
+                    writer.write("Username: " + player[2] + "\n");
+                    writer.write("Email: " + player[1] + "\n");
+                    writer.write("Player Picks:\n");
+
+                    // Update the player's picks and scores
+                    List<String[]> contestantData = readContestantData("Contestants name"); // Assuming method to read contestants.csv
+                    int totalScore = 0;
+                    for (String selectedContestant : selectedContestants) {
+                        for (String[] contestant : contestantData) {
+                            if (selectedContestant.equals(contestant[0])) {
+                                writer.write(Arrays.toString(contestant) + "\n"); // Write contestant info
+                                totalScore += Integer.parseInt(contestant[4]); // Assuming score is in index 4
+                                break;
+                            }
+                        }
+                    }
+                    writer.write("Total Score: " + totalScore + "\n");
+                    break; // Exit loop after finding the player's details
+                }
+            }
+        } catch (IOException e) {
+        }
+    }
+
 
     public static List<String[]> readPlayerData(String username) {
         List<String[]> playerData = new ArrayList<>();
