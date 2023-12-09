@@ -55,14 +55,10 @@ public class login extends JFrame {
                         dispose();
                     }
                 } catch (Exception ex) {
-                    ex.printStackTrace();
-                    // Handle any exceptions or show an error message here
+                    ExceptionHandler.handleGeneralException((ex));
                 }
             }
         });
-
-
-
 
         signupButton.addActionListener(new ActionListener() {
             @Override
@@ -76,8 +72,8 @@ public class login extends JFrame {
     }
 
     private boolean validatePlayerCredentials(String enteredUsername) {
-        CSVHandler csvHandler = new CSVHandler();
-        List<String[]> playerData = csvHandler.readPlayer();
+
+        List<String[]> playerData = CSVHandler.readPlayer();
 
         for (String[] player : playerData) {
             if (enteredUsername.equals(player[0])) {
@@ -95,10 +91,6 @@ public class login extends JFrame {
 
         return enteredUsername.equals(adminUsername) && enteredPassword.equals(adminPassword);
     }
-
-
-
-
 
     private void openSignupWindow() {
         SwingUtilities.invokeLater(() -> {
@@ -157,6 +149,5 @@ public class login extends JFrame {
             signupFrame.setVisible(true);
         });
     }
-
 
 }

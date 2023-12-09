@@ -2,9 +2,8 @@ import java.io.*;
 import java.util.*;
 
 
-
 public class CSVHandler {
-
+    private static List<String[]> contestantData;
     public static void resetPlayerFiles() {
         File folder = new File("./Files/");
         File[] listOfFiles = folder.listFiles();
@@ -26,7 +25,7 @@ public class CSVHandler {
                             }
                         }
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        ExceptionHandler.handleIOException((IOException) e);
                     }
 
                     // Rewrite the file with updated content (without player picks)
@@ -36,7 +35,7 @@ public class CSVHandler {
                             bw.newLine();
                         }
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        ExceptionHandler.handleIOException((IOException) e);
                     }
 
                     // Delete the file after clearing its content
@@ -71,7 +70,7 @@ public class CSVHandler {
                             }
                         }
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        ExceptionHandler.handleFileNotFoundException((FileNotFoundException) e);
                     }
 
                     try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
@@ -80,66 +79,39 @@ public class CSVHandler {
                             bw.newLine();
                         }
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        ExceptionHandler.handleIOException((IOException) e);
                     }
                 }
             }
         }
     }
 
+    public static List<String> getSelectedContestantsFromCSV() {
+        List<String> selectedContestants = new ArrayList<>();
+        String csvFile = "./Files/selected_contestants.csv"; // Replace with your CSV file path/name
 
-    public void createPlayerCSV(String enteredUsername, String[] contestantDetails) {
-        String filePath = "./Files/" + enteredUsername + ".csv";
-
-        // Read player information
-        List<String[]> playerInfo = readPlayer();
-        if (playerInfo != null) {
-            String name = Arrays.toString(playerInfo.get(0)); // Assuming name is at index 0
-            String email = Arrays.toString(playerInfo.get(1)); // Assuming email is at index 1
-            // Use playerInfo array to get player's details like name, email, etc.
-            // Use this information as needed while writing to the CSV file
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-                // Write player information
-                writer.write("Name: " + name);
-                writer.newLine();
-                writer.write("Email: " + email);
-                writer.newLine();
-                String contestantChoice = null;
-                writer.write(contestantChoice);
-                writer.newLine();
-
-                // Writing contestant details
-                int position = 1;
-                for (String contestant : contestantDetails) {
-                    if (contestant.contains("Total Score")) {
-                        writer.write("Total Scores");
-                        writer.newLine();
-                    } else {
-                        writer.write(position++ + "\n" + contestant);
-                        writer.newLine();
-                    }
-                }
-
-                System.out.println("File saved: " + filePath);
-            } catch (IOException e) {
-                e.printStackTrace();
+        try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                // Assuming the file contains one selected contestant per line
+                selectedContestants.add(line);
             }
+        } catch (IOException e) {
+            ExceptionHandler.handleIOException((IOException) e);
         }
+
+        return selectedContestants;
     }
-
-
-
-
 
 
     public void writePlayer(String name, String email, String newUsername) {
         String filePath = "./Files/Players.csv";
         try {
             FileWriter writer = new FileWriter(filePath, true);
-            writer.append(name + "," + email + "," + newUsername + "\n");
+            writer.append(name).append(",").append(email).append(",").append(newUsername).append("\n");
             writer.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            ExceptionHandler.handleIOException((IOException) e);
         }
     }
 
@@ -157,7 +129,7 @@ public class CSVHandler {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            ExceptionHandler.handleIOException((IOException) e);
         }
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(csvFile))) {
@@ -166,7 +138,7 @@ public class CSVHandler {
                 bw.newLine();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            ExceptionHandler.handleIOException((IOException) e);
         }
     }
 
@@ -181,7 +153,8 @@ public class CSVHandler {
                 playerData.add(values);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            ExceptionHandler.handleIOException((IOException) e);
+            ExceptionHandler.handleFileNotFoundException((FileNotFoundException) e);
         }
         return playerData;
     }
@@ -190,6 +163,7 @@ public class CSVHandler {
     public static void createPlayerCSV(String username, String[] selectedContestants) {
         String playerFileName = "./Files/" + username + ".csv";
         List<String[]> playerData = readPlayer(); // Assuming readPlayer() reads Players.csv
+        List<String[]> contestantData = readContestantData("Contestants name"); // Use readContestantData to get contestant info
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(playerFileName))) {
             for (String[] player : playerData) {
@@ -199,27 +173,36 @@ public class CSVHandler {
                     writer.write("Email: " + player[1] + "\n");
                     writer.write("Player Picks:\n");
 
-                    // Update the player's picks and scores
-                    List<String[]> contestantData = readContestantData("Contestants name"); // Assuming method to read contestants.csv
+                    // Write selected contestants into the CSV file
+                    for (String selectedContestant : selectedContestants) {
+                        for (String[] contestant : contestantData) {
+                            if (selectedContestant.equals(contestant[0])) {
+                                String fullLine = String.join(",", contestant);
+                                writer.write(fullLine + "\n");
+                                break;
+                            }
+                        }
+                    }
+
                     int totalScore = 0;
                     for (String selectedContestant : selectedContestants) {
                         for (String[] contestant : contestantData) {
                             if (selectedContestant.equals(contestant[0])) {
-                                writer.write(Arrays.toString(contestant) + "\n"); // Write contestant info
                                 totalScore += Integer.parseInt(contestant[4]); // Assuming score is in index 4
                                 break;
                             }
                         }
                     }
                     writer.write("Total Score: " + totalScore + "\n");
+
                     break; // Exit loop after finding the player's details
                 }
             }
         } catch (IOException e) {
+            ExceptionHandler.handleFileNotFoundException((FileNotFoundException) e);
+            ExceptionHandler.handleIOException((IOException) e);
         }
     }
-
-
     public static List<String[]> readPlayerData(String username) {
         List<String[]> playerData = new ArrayList<>();
 
@@ -233,7 +216,7 @@ public class CSVHandler {
                 playerData.add(rowData);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            ExceptionHandler.handleFileNotFoundException((FileNotFoundException) e);
         }
 
         return playerData;
@@ -253,7 +236,8 @@ public class CSVHandler {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            ExceptionHandler.handleFileNotFoundException((FileNotFoundException) e);
+            ExceptionHandler.handleIOException((IOException) e);
         }
 
         return contestantNames;
@@ -272,7 +256,8 @@ public class CSVHandler {
                 contestantData.add(rowData);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            ExceptionHandler.handleFileNotFoundException((FileNotFoundException) e);
+            ExceptionHandler.handleIOException((IOException) e);
         }
 
         return contestantData;
@@ -307,7 +292,8 @@ public class CSVHandler {
                     }
                     writer.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    ExceptionHandler.handleFileNotFoundException((FileNotFoundException) e);
+                    ExceptionHandler.handleIOException((IOException) e);
                 }
             }
         }
@@ -342,7 +328,8 @@ public class CSVHandler {
                 updatedFileContent.add(updatedLine.toString());
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            ExceptionHandler.handleFileNotFoundException((FileNotFoundException) e);
+            ExceptionHandler.handleIOException((IOException) e);
         }
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(csvFile))) {
@@ -351,7 +338,8 @@ public class CSVHandler {
                 bw.newLine();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            ExceptionHandler.handleFileNotFoundException((FileNotFoundException) e);
+            ExceptionHandler.handleIOException((IOException) e);
         }
     }
 
@@ -382,15 +370,14 @@ public class CSVHandler {
                             }
                         }
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        ExceptionHandler.handleFileNotFoundException((FileNotFoundException) e);
+                        ExceptionHandler.handleIOException((IOException) e);
                     }
                 }
             }
         }
         return userNamesAndEmails;
     }
-
-
 }
 
 
