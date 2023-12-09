@@ -19,8 +19,7 @@ public class AdminWindow extends JFrame {
 
         // Implement admin window components
         JComboBox<String> NewplayerFoldersDropDown = new JComboBox<>();
-        JComboBox<String> playerFoldersDropDown = new JComboBox<>();
-        JButton newPlayerFolderButton = new JButton("Player Folder");
+        JButton newPlayerFolderButton = new JButton("Players");
         JButton updateButton = new JButton("Update");
         JButton resetButton = new JButton("Reset");
         JButton EmailButton = new JButton("Email");
@@ -108,7 +107,7 @@ public class AdminWindow extends JFrame {
 
             JButton updateButton = new JButton("Update Scores");
             JButton cancelButton = new JButton("Cancel");
-            JButton RemoveButton = new JButton("Remove");
+
 
 
             updateButton.addActionListener(new ActionListener() {
@@ -140,22 +139,17 @@ public class AdminWindow extends JFrame {
                     }
                 }
             });
-
-
-            RemoveButton.addActionListener(new ActionListener() {
+            cancelButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-
-                    new RemoveWindow();
+                    new AdminWindow();
                     dispose();
-
                 }
             });
 
-
             panel.add(updateButton);
             panel.add(cancelButton);
-            panel.add(RemoveButton);
+
 
 
             add(panel);
@@ -203,7 +197,8 @@ public class AdminWindow extends JFrame {
                             CSVHandler.removeContestantFromUsers(contestantToRemove);
                         }
                     }
-                    dispose(); // Close the window after removing contestants
+                    new AdminWindow();
+                    dispose();
                 }
             });
 
@@ -211,6 +206,7 @@ public class AdminWindow extends JFrame {
             cancelButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
+                    new AdminWindow();
                     dispose(); // Close the window without updating
                 }
             });
@@ -223,13 +219,14 @@ public class AdminWindow extends JFrame {
         }
     }
 
-    public class EmailWindow extends JFrame {
-        private JTextField fromField;
-        private JTextField toField;
-        private JTextArea messageArea;
-        private JComboBox<String> userList;
+    public static class EmailWindow extends JFrame {
+        private final JTextField fromField;
+        private final JPasswordField passwordField; // Add this field for the password
+        private final JTextField toField;
+        private final JTextArea messageArea;
+        private final JComboBox<String> userList;
 
-        public EmailWindow() {
+        private EmailWindow() {
             setTitle("Send Email");
             setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             setSize(600, 400);
@@ -266,6 +263,14 @@ public class AdminWindow extends JFrame {
 
             JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
+            JPanel passwordPanel = new JPanel(new FlowLayout());
+            JLabel passwordLabel = new JLabel("Password:");
+            passwordField = new JPasswordField(20);
+            passwordPanel.add(passwordLabel);
+            passwordPanel.add(passwordField);
+
+            topPanel.add(passwordPanel, BorderLayout.SOUTH);
+
             JButton returnButton = new JButton("Return");
             returnButton.addActionListener(new ActionListener() {
                 @Override
@@ -279,7 +284,18 @@ public class AdminWindow extends JFrame {
             sendButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    Email.sendEmail(fromField.getText(), toField.getText(), messageArea.getText());
+                    String from = fromField.getText();
+                    // Assuming you have a JPasswordField for the password input
+                    char[] passwordChars = passwordField.getPassword();
+                    String password = new String(passwordChars); // Convert char[] to String
+
+                    String to = toField.getText();
+                    String subject = "Your Subject Here"; // Provide a subject for the email
+                    String message = messageArea.getText();
+
+                    // Call the sendEmail method with the necessary parameters
+                    Email.sendEmail(from, password, to, subject, message);
+
                     new AdminWindow();
                     dispose();
                 }
