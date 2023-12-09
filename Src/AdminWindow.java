@@ -139,12 +139,9 @@ public class AdminWindow extends JFrame {
                     }
                 }
             });
-            cancelButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    new AdminWindow();
-                    dispose();
-                }
+            cancelButton.addActionListener(e -> {
+                new AdminWindow();
+                dispose();
             });
 
             panel.add(updateButton);

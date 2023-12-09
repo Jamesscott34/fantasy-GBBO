@@ -3,6 +3,8 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.util.Properties;
 
+
+
 public class Email {
     public static void sendEmail(String from, String password, String to, String subject, String messageBody) {
         // Email configuration (change according to your email provider)

@@ -9,6 +9,8 @@ public class login extends JFrame {
     private JPasswordField passwordField;
 
     public login() {
+
+
         initializeLogin();
     }
 

@@ -17,6 +17,7 @@ public class ExceptionHandler {
     public static void handleNumberFormatException(NumberFormatException e) {
         System.err.println("Number format exception at line " + e.getStackTrace()[0].getLineNumber() + ": " + e.getMessage());
         System.err.println("Validate input format. Expected a number but received something else.");
+
     }
 
     public static void handleIndexOutOfBoundsException(IndexOutOfBoundsException e) {

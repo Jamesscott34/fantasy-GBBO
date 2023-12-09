@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ExistingPlayerWindow extends JFrame {
-    private static String enteredUsername;
+    static String enteredUsername;
     private final JList<String> contestantsList;
     private boolean playerInformationDisplayed = false;
 
@@ -57,46 +57,49 @@ public class ExistingPlayerWindow extends JFrame {
                 List<String[]> contestantData = CSVHandler.readContestantData("Contestants name");
 
                 List<String[]> updatedScores = new ArrayList<>();
+                List<String> playerPicksToRemove = new ArrayList<>();
 
-                // Keep track of selected contestants for updating total score
-                List<String> selectedContestantsForTotal = new ArrayList<>(selectedContestants);
-
+                // Update scores for contestants and identify player picks to remove
                 for (String[] contestant : contestantData) {
                     String contestantName = contestant[0];
                     boolean isUserContestant = selectedContestants.contains(contestantName);
-
-                    // Retrieve the original score or set to 0 if not selected
                     int currentScore = isUserContestant ? Integer.parseInt(contestant[4]) : 0;
 
-                    // Update the score logic if the contestant is selected
                     if (isUserContestant) {
-                        int updatedScore = currentScore + 10; // Update score logic
+                        int updatedScore = currentScore + 10;
                         contestant[4] = String.valueOf(updatedScore);
                     } else {
-                        // If the contestant has been removed, set their score to 0
-                        contestant[4] = "0";
+                        playerPicksToRemove.add(contestantName);
                     }
 
-                    // Add the updated score to the list
                     updatedScores.add(new String[]{contestantName, contestant[4]});
-
-                    // Remove the current contestant from the selected list for updating total score
-                    selectedContestantsForTotal.remove(contestantName);
                 }
 
-                // For removed contestants, set their scores to 0 for the player file
-                for (String removedContestant : selectedContestantsForTotal) {
-                    updatedScores.add(new String[]{removedContestant, "0"});
+                // Remove player picks not present in the updated selected contestants list
+                List<String> currentPicks = CSVHandler.getSelectedContestantsFromCSV();
+                for (String pick : currentPicks) {
+                    if (!selectedContestants.contains(pick)) {
+                        playerPicksToRemove.add(pick);
+                    }
                 }
 
-                // Update contestant scores and create/update the player CSV
+                // Update contestant scores
                 CSVHandler.updateContestantScores(updatedScores);
+
+                // Remove player picks that are not in the updated selected contestants list
+                for (String playerPick : playerPicksToRemove) {
+                    CSVHandler.removeContestantFromUsers(playerPick);
+                }
+
+                // Create/update the player CSV with selected contestants
                 CSVHandler.createPlayerCSV(username, selectedContestants.toArray(new String[0]));
 
                 // Refresh the existing player window with the updated information
                 new ExistingPlayerWindow(username);
             }
         });
+
+
 
 
         contestantsButton.addActionListener(new ActionListener() {
@@ -271,7 +274,7 @@ public class ExistingPlayerWindow extends JFrame {
             returnButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    new AdminWindow();
+                    new ExistingPlayerWindow(enteredUsername);
                     dispose();
                 }
             });
@@ -292,7 +295,7 @@ public class ExistingPlayerWindow extends JFrame {
                     // Call the sendEmail method with the necessary parameters
                     Email.sendEmail(from, password, to, subject, message);
 
-                    new AdminWindow();
+                    new ExistingPlayerWindow(enteredUsername);
                     dispose();
                 }
             });

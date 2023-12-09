@@ -28,6 +28,7 @@ public class CSVHandler {
                         ExceptionHandler.handleIOException((IOException) e);
                     }
 
+
                     // Rewrite the file with updated content (without player picks)
                     try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
                         for (String contentLine : updatedContent) {
@@ -50,41 +51,61 @@ public class CSVHandler {
 
 
     public static void removeContestantFromUsers(String contestantToRemove) {
-        removeContestantFromContestantsCSV(contestantToRemove); // Remove from contestants.csv
+        List<String[]> contestantData = readContestantData("Contestants name"); // Read contestants from CSV
 
-        File folder = new File("./Files");
+        File folder = new File("./Files/");
         File[] listOfFiles = folder.listFiles();
 
         if (listOfFiles != null) {
             for (File file : listOfFiles) {
                 if (file.isFile() && file.getName().endsWith(".csv") && !file.getName().equals("Players.csv")) {
-                    List<String> updatedContent = new ArrayList<>();
+                    if (!file.getName().equals("contestants.csv")) {
+                        List<String> updatedContent = new ArrayList<>();
 
-                    try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-                        String line;
-                        String csvSplitBy = ",";
-                        while ((line = br.readLine()) != null) {
-                            String[] rowData = line.split(csvSplitBy);
-                            if (!rowData[0].equals(contestantToRemove)) {
-                                updatedContent.add(line);
+                        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                            String line;
+                            String csvSplitBy = ",";
+                            while ((line = br.readLine()) != null) {
+                                String[] rowData = line.split(csvSplitBy);
+                                boolean isPlayerPickInContestants = false;
+
+                                // Check if the player pick exists in the contestants list
+                                for (String[] contestant : contestantData) {
+                                    if (rowData.length > 0 && rowData[0].equals(contestant[0])) {
+                                        updatedContent.add(line); // Add contestant if found in contestants.csv
+                                        isPlayerPickInContestants = true;
+                                        break;
+                                    }
+                                }
+
+                                // Remove player pick if not found in contestants.csv
+                                if (!isPlayerPickInContestants) {
+                                    continue; // Skip adding this line to updatedContent
+                                }
                             }
+                        } catch (IOException e) {
+                            ExceptionHandler.handleFileNotFoundException((FileNotFoundException) e);
+                            ExceptionHandler.handleIOException((IOException) e);
                         }
-                    } catch (IOException e) {
-                        ExceptionHandler.handleFileNotFoundException((FileNotFoundException) e);
-                    }
 
-                    try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
-                        for (String contentLine : updatedContent) {
-                            bw.write(contentLine);
-                            bw.newLine();
+                        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
+                            for (String contentLine : updatedContent) {
+                                bw.write(contentLine);
+                                bw.newLine();
+                            }
+                        } catch (IOException e) {
+                            ExceptionHandler.handleFileNotFoundException((FileNotFoundException) e);
+                            ExceptionHandler.handleIOException((IOException) e);
                         }
-                    } catch (IOException e) {
-                        ExceptionHandler.handleIOException((IOException) e);
                     }
                 }
             }
         }
     }
+
+
+
+
 
     public static List<String> getSelectedContestantsFromCSV() {
         List<String> selectedContestants = new ArrayList<>();
