@@ -146,9 +146,7 @@ public class AdminWindow extends JFrame {
 
             panel.add(updateButton);
             panel.add(cancelButton);
-
-
-
+            
             add(panel);
             setVisible(true);
         }

@@ -8,8 +8,6 @@ import java.util.List;
 
 public class NewPlayerWindow extends JFrame {
 
-
-
     private final DefaultListModel<String> selectedContestantsModel;
 
     public NewPlayerWindow(String enteredUsername) {

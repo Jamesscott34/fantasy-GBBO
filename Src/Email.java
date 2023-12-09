@@ -31,5 +31,6 @@ public class Email {
         } catch (MessagingException e) {
             ExceptionHandler.handleMessagingException(e);
         }
+
     }
 }

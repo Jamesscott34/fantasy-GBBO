@@ -2,6 +2,7 @@ import javax.mail.MessagingException;
 import java.io.*;
 import java.util.NoSuchElementException;
 
+
 public class ExceptionHandler {
 
     public static void handleIOException(IOException e) {

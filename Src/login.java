@@ -10,7 +10,6 @@ public class login extends JFrame {
 
     public login() {
 
-
         initializeLogin();
     }
 

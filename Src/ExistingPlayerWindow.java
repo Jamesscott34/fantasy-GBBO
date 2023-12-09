@@ -38,6 +38,7 @@ public class ExistingPlayerWindow extends JFrame {
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(new JScrollPane(contestantsList), BorderLayout.CENTER);
 
+
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         bottomPanel.add(updateButton);
         bottomPanel.add(contestantsButton);

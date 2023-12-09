@@ -69,6 +69,7 @@ public class CSVHandler {
                                 String[] rowData = line.split(csvSplitBy);
                                 boolean isPlayerPickInContestants = false;
 
+
                                 // Check if the player pick exists in the contestants list
                                 for (String[] contestant : contestantData) {
                                     if (rowData.length > 0 && rowData[0].equals(contestant[0])) {
